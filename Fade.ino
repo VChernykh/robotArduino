@@ -6,31 +6,31 @@
 #define right_SENSOR_PIN 9
 
 #define speed            100
-#define SLOW_speed       35
+#define slow_speed       35
  
-#define BACK_SLOW_speed  30
-#define BACK_FAST_speed  50
-#define BRAKE_K          4
+#define back_slow_speed  30
+#define back_FAST_speed  50
+#define brake_K          4
  
-#define STATE_FORWARD    0
-#define STATE_right      1
-#define STATE_left       2
+#define state_FORWARD    0
+#define state_right      1
+#define state_left       2
  
 #define speed_STEP       2
  
 #define FAST_TIME_THRESHOLD     500
  
-int state = STATE_FORWARD;
+int state = state_FORWARD;
 int currentspeed = speed;
 int fastTime = 0;
  
 void runForward() 
 {
-    state = STATE_FORWARD;
+    state = state_FORWARD;
  
     fastTime += 1;
     if (fastTime < FAST_TIME_THRESHOLD) {
-        currentspeed = SLOW_speed;
+        currentspeed = slow_speed;
     } else {
         currentspeed = min(currentspeed + speed_STEP, speed);
     }
@@ -44,7 +44,7 @@ void runForward()
  
 void steerright() 
 {
-    state = STATE_right;
+    state = state_right;
     fastTime = 0;
  
     analogWrite(speed_right, 0);
@@ -56,7 +56,7 @@ void steerright()
  
 void steerleft() 
 {
-    state = STATE_left;
+    state = state_left;
     fastTime = 0;
  
     analogWrite(speed_left, 0);
@@ -67,11 +67,11 @@ void steerleft()
 }
  
  
-void stepBack(int duration, int state) {
+void stepback(int duration, int state) {
     if (!duration)
         return;
-    int leftspeed = (state == STATE_right) ? BACK_SLOW_speed : BACK_FAST_speed;
-    int rightspeed = (state == STATE_left) ? BACK_SLOW_speed : BACK_FAST_speed;
+    int leftspeed = (state == state_right) ? back_slow_speed : back_FAST_speed;
+    int rightspeed = (state == state_left) ? back_slow_speed : back_FAST_speed;
  
     analogWrite(speed_left, leftspeed);
     analogWrite(speed_right, rightspeed);
@@ -96,32 +96,32 @@ void loop()
     boolean left = !digitalRead(left_SENSOR_PIN);
     boolean right = !digitalRead(right_SENSOR_PIN);
  
-    int targetState;
+    int targetstate;
  
     if (left == right) {
-        targetState = STATE_FORWARD;
+        targetstate = state_FORWARD;
     } else if (left) {
-        targetState = STATE_left;
+        targetstate = state_left;
     } else {
-        targetState = STATE_right;
+        targetstate = state_right;
     }
  
-    if (state == STATE_FORWARD && targetState != STATE_FORWARD) {
-        int brakeTime = (currentspeed > SLOW_speed) ?
+    if (state == state_FORWARD && targetstate != state_FORWARD) {
+        int brakeTime = (currentspeed > slow_speed) ?
             currentspeed : 0;
-        stepBack(brakeTime, targetState);
+        stepback(brakeTime, targetstate);
     }
  
-    switch (targetState) {
-        case STATE_FORWARD:
+    switch (targetstate) {
+        case state_FORWARD:
             runForward();
             break;
  
-        case STATE_right:
+        case state_right:
             steerright();
             break;
  
-        case STATE_left:
+        case state_left:
             steerleft();
             break;
     }
